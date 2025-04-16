@@ -177,12 +177,12 @@
 
     function toggleGeneOptions() {
       const geneDiv = document.getElementById("geneOptions");
-      geneDiv.classList.toggle("hidden", document.getElementById("genes").value === "no");
+      geneDiv.classList.toggle("hidden", document.getElementById("genes").value == "no");
     }
 
     function toggleCNV() {
       const cnvDiv = document.getElementById("cnvOptions");
-      cnvDiv.classList.toggle("hidden", document.getElementById("cnv").value === "no");
+      cnvDiv.classList.toggle("hidden", document.getElementById("cnv").value == "no");
     }
 
     function calcularRisco() {
