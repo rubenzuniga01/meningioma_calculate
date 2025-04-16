@@ -97,27 +97,30 @@
       visibility: visible;
       opacity: 1;
     }
-    .hidden {
-      display: none;
-    }
   </style>
 </head>
 <body>
   <div class="main">
     <h2>Recurrence-Free Survival (RFS) Calculator for Meningiomas <span class="tooltip">ℹ️
-      <span class="tooltiptext">Only applicable for surgical cases</span>
+      <span class="tooltiptext">Only applicable for surgical cases, only for research and educational purposes!!</span>
     </span></h2>
-
-    <label for="age">Age</label>
-    <select id="age">
-      <option value=">=55">≥ 55 years</option>
-      <option value="<55">< 55 years</option>
-    </select>
 
     <label for="sex">Sex</label>
     <select id="sex">
       <option value="female">Female</option>
       <option value="male">Male</option>
+    </select>
+
+    <label for="age">Age</label>
+    <select id="age">
+      <option value="old">≥ 55 years</option>
+      <option value="young">< 55 years</option>
+    </select>
+
+    <label for="race">Race</label>
+    <select id="race">
+      <option value="nonblack">Non-Black</option>
+      <option value="black">Black</option>
     </select>
 
     <label for="who">WHO Grade (2021)</label>
@@ -164,12 +167,19 @@
 
   <div class="disclaimer">
     <strong>Disclaimer:</strong><br>
-    The following calculator has not been externally validated...
+    This calculator has not been externally validated, uses published data from several studies (systematic review and meta-analysis yet to be published in World Neurosurgery), and therefore should not be used to provide medical advice. This tool should only be used for research or educational purposes, encouraging the performance of large multicenter prospective studies, as occurs with IMPACT or CRASH in TBI.
+    <p><strong>Authors:</strong><br>Zuniga RDR, Carrijo GS, Aguiar PHP, and Fonseca FLA. Centro Universitário FMABC, Santo André, Brazil</p>
+    <p><strong>References:</strong><br>
+    Domingues PH et al. Proposal for a new risk stratification classification for meningioma. Neuro Oncol. 2014;16(5):735–747. doi:10.1093/neuonc/not325<br>
+    Maas SLN et al. Integrated molecular-morphologic meningioma classification: A multicenter retrospective analysis. J Clin Oncol. 2021;39(34):3839–3852. doi:10.1200/JCO.21.00784<br>
+    Owusu-Adjei B et al. Evidence-based framework for postoperative surveillance of meningioma. Neuro-Oncol Pract. 2024; doi:10.1093/nop/npae117</p>
   </div>
 
   <script>
     const logHR = {
       sex: { female: 0, male: Math.log(1.6) },
+      age: { young: Math.log(3), old: 0 },
+      race: { black: Math.log(2.9), nonblack: 0 },
       loss1p: Math.log(4.67),
       loss6q: Math.log(3.35),
       loss14q: Math.log(2.90),
@@ -183,47 +193,44 @@
     };
 
     function toggleGeneOptions() {
-      const geneDiv = document.getElementById("geneOptions");
-      geneDiv.classList.toggle("hidden", document.getElementById("genes").value === "no");
+      document.getElementById("geneOptions").classList.toggle("hidden", document.getElementById("genes").value === "no");
     }
 
     function toggleCNV() {
-      const cnvDiv = document.getElementById("cnvOptions");
-      cnvDiv.classList.toggle("hidden", document.getElementById("cnv").value === "no");
+      document.getElementById("cnvOptions").classList.toggle("hidden", document.getElementById("cnv").value === "no");
     }
 
     function calcularRisco() {
       let beta = 0;
-      let numVariaveisRisco = 0;
+      let variaveis = 0;
 
       const who = document.getElementById("who").value;
       const simpson = document.getElementById("simpson").value;
       const sex = document.getElementById("sex").value;
       const age = document.getElementById("age").value;
-      const TERTp = document.getElementById("TERTp").checked;
-      const CDKN2A = document.getElementById("CDKN2A").checked;
-
-      if (age === "<55") {
-        beta += Math.log(3);
-        numVariaveisRisco++;
-      }
+      const race = document.getElementById("race").value;
 
       beta += logHR.sex[sex];
-      numVariaveisRisco++;
-
+      beta += logHR.age[age];
+      beta += logHR.race[race];
       beta += logHR.Simpson[simpson];
-      if (simpson > 1) numVariaveisRisco++;
 
-      if (!(TERTp || CDKN2A)) {
+      variaveis += 3;
+
+      const TERTp = document.getElementById("TERTp").checked;
+      const CDKN2A = document.getElementById("CDKN2A").checked;
+      const isGeneHighRisk = TERTp || CDKN2A;
+
+      if (!isGeneHighRisk) {
         beta += logHR.WHO[who];
-        if (who > 1) numVariaveisRisco++;
+        variaveis++;
       }
 
       if (document.getElementById("cnv").value === "yes") {
         ["loss1p", "loss6q", "loss14q"].forEach(g => {
           if (document.getElementById(g).checked) {
             beta += logHR[g];
-            numVariaveisRisco++;
+            variaveis++;
           }
         });
       }
@@ -232,14 +239,12 @@
         ["TERTp", "CDKN2A", "KLF4", "TRAF7", "AKT1"].forEach(g => {
           if (document.getElementById(g).checked) {
             beta += logHR[g];
-            numVariaveisRisco++;
+            variaveis++;
           }
         });
       }
 
-      const betaSuavizado = beta / Math.sqrt(numVariaveisRisco || 1);
-      const HR_total = Math.exp(betaSuavizado);
-
+      const HR_total = Math.exp(beta / Math.sqrt(variaveis));
       const RFS_5 = Math.pow(0.9, HR_total);
       const RFS_10 = Math.pow(0.8, HR_total);
 
