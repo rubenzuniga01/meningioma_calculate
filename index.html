@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <title>Recurrence-Free Survival (RFS) Calculator for Meningiomas</title>
   <style>
-    .hidden {
-  display: none;
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f4f4f9;
@@ -55,6 +53,7 @@
     }
     .checkbox-group {
       margin-left: 10px;
+      transition: opacity 0.3s ease;
     }
     #resultado {
       margin-top: 30px;
@@ -98,6 +97,10 @@
     .tooltip:hover .tooltiptext {
       visibility: visible;
       opacity: 1;
+    }
+    .hidden {
+      display: none;
+      opacity: 0;
     }
   </style>
 </head>
@@ -179,12 +182,12 @@
 
     function toggleGeneOptions() {
       const geneDiv = document.getElementById("geneOptions");
-      geneDiv.classList.toggle("hidden", document.getElementById("genes").value == "no");
+      geneDiv.classList.toggle("hidden", document.getElementById("genes").value === "no");
     }
 
     function toggleCNV() {
       const cnvDiv = document.getElementById("cnvOptions");
-      cnvDiv.classList.toggle("hidden", document.getElementById("cnv").value == "no");
+      cnvDiv.classList.toggle("hidden", document.getElementById("cnv").value === "no");
     }
 
     function calcularRisco() {
@@ -232,7 +235,6 @@
           <tr><td>${RFS_5_percent}%</td><td>${RFS_10_percent}%</td></tr>
         </table>
         <p style="margin-top: 20px; color: #444">${recommendation}</p>`;
-    }
     }
   </script>
 </body>
